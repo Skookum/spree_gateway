@@ -27,12 +27,11 @@ module Spree
     end
 
     def authorize(amount, creditcard, gateway_options)
-      t_options = { :order => {:invoice_number => gateway_options[:order_id] } }
-       create_transaction( amount, creditcard, :auth_only, t_options )
+      create_transaction(amount, creditcard, :auth_only, options_for_auth(gateway_options))
     end
 
     def purchase(amount, creditcard, gateway_options)
-      create_transaction(amount, creditcard, :auth_capture)
+      create_transaction(amount, creditcard, :auth_capture, options_for_auth(gateway_options))
     end
 
     def capture(authorization, creditcard, gateway_options)
@@ -116,6 +115,11 @@ module Spree
                         :email => payment.order.email,
                         :payment_profiles => info },
           :validation_mode => validation_mode }
+      end
+
+      def options_for_auth(gateway_options)
+        { :order => { :invoice_number => gateway_options[:order_id],
+                      :description => gateway_options[:description] } }
       end
 
       # As in PaymentGateway but with separate name fields
